@@ -1,4 +1,4 @@
-#   SweetHome3D HTML5 to Blender inporter
+#   SweetHome3D HTML5 to Blender importer
 
 
 ## How to use:
