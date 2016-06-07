@@ -1,5 +1,8 @@
 #   SweetHome3D HTML5 to Blender importer
 
+## Video Tutorial
+
+  https://youtu.be/ZwWan1RlQZY   
 
 ## How to use:
 *   1-Open Sweethome 3D  http://www.sweethome3d.com
