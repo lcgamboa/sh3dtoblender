@@ -1,6 +1,6 @@
 #  ########################################################################
 #
-#   SweetHome3D HTML5 to Blender importer
+#   SweetHome3D XML to Blender inporter
 #
 #  ########################################################################
 #
@@ -26,9 +26,9 @@
 # How to use:
 #   1-Open Sweethome 3D  http://www.sweethome3d.com
 #   2-Create or open a existent house
-#   3-Use the plugin EXPORT to HTML5 http://www.sweethome3d.com/support/forum/viewthread_thread,6708
+#   3-Use the plugin EXPORT to XML http://www.sweethome3d.com/support/forum/viewthread_thread,6708
 #   4-Open blender 
-#   5-Choose Text Editor window and open sh3d_html5_to_blender.py script
+#   5-Choose Text Editor window and open sh3d_xml_to_blender.py script
 #   6-Run the script, in the File dialog choose the zip file generate by SweetHome 3D EXPORT to HTML5 plugin
    
 # It's possible use the imported model with blender render and blender engine (the script add Logic blocks for FPS game like behavior)
@@ -60,15 +60,10 @@ class OpenFile(bpy.types.Operator):
 
     zip_path = os.path.abspath(zip_name)
     zip_dir = os.path.dirname(zip_path)
-    html_path=os.path.join(zip_dir, 'html')
-    xml_path=os.path.join(html_path, 'xml') 
-    zip2_path=os.path.join(html_path, os.path.basename(zip_path)) 
+    xml_path=os.path.join(zip_dir, 'xml')
 
     #unzip files
     with ZipFile(zip_path, 'r') as zip_file:
-       zip_file.extractall(html_path)
-
-    with ZipFile(zip2_path, 'r') as zip_file:
        zip_file.extractall(xml_path)
 
 
@@ -195,6 +190,7 @@ class OpenFile(bpy.types.Operator):
         dimZ = float(element.get('depth')) 
         locX = float(element.get('x'))*scale
         locY = -float(element.get('y'))*scale
+        power= float(element.get('power'))
         
         lve=0.0;
         if 'level' in element.keys():
@@ -208,7 +204,7 @@ class OpenFile(bpy.types.Operator):
           locZ= (dimY*scale/2.0)+lve 
           
         bpy.ops.object.lamp_add(type='POINT',location=(locX, locY, locZ))
-        bpy.context.active_object.data.energy=100.0*scale
+        bpy.context.active_object.data.energy=200.0*power*scale
         bpy.context.active_object.data.shadow_method='RAY_SHADOW'
         bpy.context.active_object.name=element.get('name')
 
