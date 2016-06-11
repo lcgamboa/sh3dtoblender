@@ -42,6 +42,8 @@ import os
 import math
 import bpy
 import mathutils
+import struct
+import shutil
 
 scale=0.05
 speed=0.5
@@ -62,12 +64,16 @@ class OpenFile(bpy.types.Operator):
     zip_dir = os.path.dirname(zip_path)
     xml_path=os.path.join(zip_dir, 'xml')
 
+    #remove old files
+    shutil.rmtree(xml_path,True)
+    
     #unzip files
     with ZipFile(zip_path, 'r') as zip_file:
        zip_file.extractall(xml_path)
 
 
     #clear scene
+    bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
 
@@ -112,7 +118,8 @@ class OpenFile(bpy.types.Operator):
          levels.append(Level(id=element.get('id'),elev=float(element.get('elevation')),ft=float(element.get('floorThickness'))))
            
             
-      if objectName in ('doorOrWindow','pieceOfFurniture'):  
+      #if objectName in ('doorOrWindow','pieceOfFurniture'):
+      if 'model' in element.keys():  
         print(objectName)   
         filename=os.path.join(xml_path,element.get('model'))
         dimX = float(element.get('width'))
@@ -185,29 +192,27 @@ class OpenFile(bpy.types.Operator):
           obs[0].rotation_euler[2]=-float(angle)   
       
       if objectName in ('light'):   
-        dimX = float(element.get('width'))
-        dimY = float(element.get('height'))
-        dimZ = float(element.get('depth')) 
-        locX = float(element.get('x'))*scale
-        locY = -float(element.get('y'))*scale
-        power= float(element.get('power'))
+        owner=bpy.context.active_object    
+       
+        power= float(element.get('power'))       
+  
+        for light in element:
+          if light.tag == 'lightSource':       
+            color=light.get('color')
+            r=int(color[2:4],16)/255.0
+            g=int(color[4:6],16)/255.0
+            b=int(color[6:8],16)/255.0
+            bcolor=[r,g,b]
+            lposx=(float(light.get('x'))-0.5)*dimX*scale*2.1
+            lposy=(float(light.get('y'))-0.5)*dimY*scale*2.1
+            lposz=(float(light.get('z'))-0.5)*dimZ*scale*2.1
+                
+            bpy.ops.object.lamp_add(type='POINT',location=(lposx, lposy, lposz))
+            bpy.context.active_object.data.energy=200.0*power*scale
+            bpy.context.active_object.data.shadow_method='RAY_SHADOW'
+            bpy.context.active_object.data.color=bcolor
+            bpy.context.active_object.parent=owner
         
-        lve=0.0;
-        if 'level' in element.keys():
-          for lv in levels:
-            if lv.id == element.get('level'):
-              lve=(lv.elev)*scale         
-           
-        if 'elevation' in element.keys():
-          locZ= (dimY*scale/2.0)+(float(element.get('elevation'))*scale)+lve 
-        else:    
-          locZ= (dimY*scale/2.0)+lve 
-          
-        bpy.ops.object.lamp_add(type='POINT',location=(locX, locY, locZ))
-        bpy.context.active_object.data.energy=200.0*power*scale
-        bpy.context.active_object.data.shadow_method='RAY_SHADOW'
-        bpy.context.active_object.name=element.get('name')
-
     #insert camera  
       if objectName in ('observerCamera'): 
        if element.get('attribute') == 'observerCamera':
@@ -326,10 +331,19 @@ class OpenFile(bpy.types.Operator):
     for item in bpy.data.materials:
         if item.alpha == 1.0 :
            item.use_transparency = False
+           item.use_transparent_shadows = True
+        else:
+           item.raytrace_mirror.use = True
+           item.raytrace_mirror.reflect_factor= 0.1  
+           item.diffuse_intensity= 0.01
+ 
            
     #better collision detection      
-    bpy.data.scenes["Scene"].game_settings.physics_step_sub=5.0       
+    bpy.data.scenes["Scene"].game_settings.physics_step_sub=5.0 
+
     return {'FINISHED'}
+
+
  
   def invoke(self, context, event):
       context.window_manager.fileselect_add(self)
