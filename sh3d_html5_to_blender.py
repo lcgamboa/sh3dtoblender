@@ -78,6 +78,7 @@ class OpenFile(bpy.types.Operator):
 
 
     #clear scene
+    bpy.data.scenes["Scene"].unit_settings.scale_length=1.0
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
@@ -112,6 +113,7 @@ class OpenFile(bpy.types.Operator):
     obs[0].name=xmlRoot.get('name')
     obs[0].dimensions=obs[0].dimensions*scale
     obs[0].location=(0.0, 0.0, 0.0)
+    bpy.ops.object.shade_flat()
 
     Level = namedtuple("Level", "id elev ft")
     levels=[];
@@ -331,7 +333,17 @@ class OpenFile(bpy.types.Operator):
            
     #better collision detection      
     bpy.data.scenes["Scene"].game_settings.physics_step_sub=5.0 
-
+    
+    #world settings
+    bpy.data.worlds["World"].light_settings.use_ambient_occlusion=True
+    bpy.data.worlds["World"].light_settings.ao_factor=0.2
+    bpy.data.worlds["World"].light_settings.use_environment_light=True
+    bpy.data.worlds["World"].light_settings.environment_energy=0.2
+    
+    bpy.data.scenes["Scene"].unit_settings.system='METRIC'
+    bpy.data.scenes["Scene"].unit_settings.scale_length=0.01/scale
+    
+    
     return {'FINISHED'}
 
 
