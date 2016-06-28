@@ -197,6 +197,51 @@ class OpenFile(bpy.types.Operator):
         if 'angle' in element.keys():
           angle = element.get('angle') 
           obs[0].rotation_euler[2]=-float(angle)   
+
+        if 'color' in element.keys():
+          color = element.get('color') 
+          r=int(color[2:4],16)/255.0
+          g=int(color[4:6],16)/255.0
+          b=int(color[6:8],16)/255.0
+          bcolor=[r,g,b]
+          for material in bpy.context.active_object.data.materials:
+            material.diffuse_color=bcolor
+  
+        #search for texture or materials
+        for prop in element:
+          if prop.tag == 'texture':
+              image=prop.get('image')
+              for material in bpy.context.active_object.data.materials:
+                  img = bpy.data.images.load(os.path.join(xml_path,image))
+                  tex = bpy.data.textures.new(image, type = 'IMAGE')
+                  tex.image = img        
+                  mtex = material.texture_slots.add()
+                  mtex.texture = tex
+              
+          if prop.tag == 'material':
+              mname=prop.get('name')
+              if 'color' in prop.keys():
+                color = prop.get('color') 
+                r=int(color[2:4],16)/255.0
+                g=int(color[4:6],16)/255.0
+                b=int(color[6:8],16)/255.0
+                bcolor=[r,g,b]
+                for material in bpy.context.active_object.data.materials:
+                  if mname in material.name: 
+                    material.diffuse_color=bcolor
+        
+              #face texture of material
+              for texture in prop:
+                if texture.tag == 'texture':  
+                  image=texture.get('image')
+                  for material in bpy.context.active_object.data.materials:
+                     if mname in material.name: 
+                       img = bpy.data.images.load(os.path.join(xml_path,image))
+                       tex = bpy.data.textures.new(image, type = 'IMAGE')
+                       tex.image = img        
+                       mtex = material.texture_slots.add()
+                       mtex.texture = tex  
+                  
       
       if objectName in ('light'):   
             owner=bpy.context.active_object    
