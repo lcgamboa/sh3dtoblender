@@ -119,7 +119,10 @@ class OpenFile(bpy.types.Operator):
       if objectName == 'level':
          levels.append(Level(id=element.get('id'),elev=float(element.get('elevation')),ft=float(element.get('floorThickness'))))
            
-            
+      if objectName == 'furnitureGroup':       
+         for furniture in element:
+            xmlRoot.append(furniture);      
+      
       #if objectName in ('doorOrWindow','pieceOfFurniture'):
       if 'model' in element.keys():  
         print(objectName)   
@@ -255,16 +258,18 @@ class OpenFile(bpy.types.Operator):
             lposz=(float(light.get('z'))-0.5)*dimZ*scale*2.1
                 
             bpy.ops.object.lamp_add(type='POINT',location=(lposx, lposy, lposz))
-		    bpy.context.active_object.data.energy=200.0*power*scale
-		    bpy.context.active_object.data.shadow_method='RAY_SHADOW'
-		    bpy.context.active_object.data.color=bcolor
-		    bpy.context.active_object.parent=owner
-		
-	    #insert camera  
-	      if objectName in ('observerCamera'): 
-	       if element.get('attribute') == 'observerCamera':
-		locX = float(element.get('x'))*scale
-		locY = -float(element.get('y'))*scale
+            bpy.context.active_object.data.energy=4000.0*power*scale
+            bpy.context.active_object.data.shadow_method='RAY_SHADOW'
+            bpy.context.active_object.data.color=bcolor
+            bpy.context.active_object.data.distance=10*scale
+            bpy.context.active_object.parent=owner
+            
+        
+    #insert camera  
+      if objectName in ('observerCamera'): 
+       if element.get('attribute') == 'observerCamera':
+        locX = float(element.get('x'))*scale
+        locY = -float(element.get('y'))*scale
         locZ = float(element.get('z'))*scale
         yaw = float(element.get('yaw'))
         pitch = float(element.get('pitch'))
@@ -390,9 +395,9 @@ class OpenFile(bpy.types.Operator):
     
     #world settings
     bpy.data.worlds["World"].light_settings.use_ambient_occlusion=True
-    bpy.data.worlds["World"].light_settings.ao_factor=0.2
+    bpy.data.worlds["World"].light_settings.ao_factor=0.01
     bpy.data.worlds["World"].light_settings.use_environment_light=True
-    bpy.data.worlds["World"].light_settings.environment_energy=0.2
+    bpy.data.worlds["World"].light_settings.environment_energy=0.01
     
     bpy.data.scenes["Scene"].unit_settings.system='METRIC'
     bpy.data.scenes["Scene"].unit_settings.scale_length=0.01/scale

@@ -124,6 +124,9 @@ class OpenFile(bpy.types.Operator):
       if objectName == 'level':
          levels.append(Level(id=element.get('id'),elev=float(element.get('elevation')),ft=float(element.get('floorThickness'))))
            
+      if objectName == 'furnitureGroup':       
+         for furniture in element:
+            xmlRoot.append(furniture);      
             
       #if objectName in ('doorOrWindow','pieceOfFurniture'):
       if 'model' in element.keys():  
