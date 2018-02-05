@@ -4,7 +4,7 @@
 #
 #  ########################################################################
 #
-#   Copyright (c) : 2016  Luis Claudio Gambôa Lopes
+#   Copyright (c) : 2018  Luis Claudio Gambôa Lopes
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ class OpenFile(bpy.types.Operator):
   filepath = bpy.props.StringProperty(subtype="FILE_PATH")
 
   def execute(self, context):
+      
     zip_name=self.filepath
 
 
@@ -109,9 +110,13 @@ class OpenFile(bpy.types.Operator):
     obs[0].dimensions=obs[0].dimensions*scale
     obs[0].location=(0.0, 0.0, 0.0)
     bpy.ops.object.shade_flat()
+    bpy.context.active_object.layers[0]= True
+    bpy.context.active_object.layers[1]= False
+    bpy.context.active_object.layers[2]= False
+    bpy.context.active_object.layers[3]= False
 
     Level = namedtuple("Level", "id elev ft")
-    levels=[];
+    levels=[]
 
     for element in xmlRoot:
       objectName = element.tag
@@ -152,8 +157,15 @@ class OpenFile(bpy.types.Operator):
         bpy.context.scene.objects.active=obs[0]
         bpy.ops.object.join()
         obs[0].name=element.get('name')
-        bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY',center='BOUNDS')
-       
+        bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY',center='BOUNDS')     
+        if objectName in ('doorOrWindow'):   
+           bpy.context.active_object.layers[1]= True  
+           bpy.context.active_object.layers[2]= False        
+        else:
+           bpy.context.active_object.layers[2]= True
+           bpy.context.active_object.layers[1]= False
+        bpy.context.active_object.layers[0]= False
+        bpy.context.active_object.layers[3]= False
         
         if 'modelMirrored' in element.keys():
           if element.get('modelMirrored') == 'true':
@@ -239,13 +251,14 @@ class OpenFile(bpy.types.Operator):
                        tex.image = img        
                        mtex = material.texture_slots.add()
                        mtex.texture = tex  
-                  
+           
       
       if objectName in ('light'):   
         owner=bpy.context.active_object    
        
         power= float(element.get('power'))       
   
+
         for light in element:
           if light.tag == 'lightSource':       
             color=light.get('color')
@@ -263,7 +276,11 @@ class OpenFile(bpy.types.Operator):
             bpy.context.active_object.data.color=bcolor
             bpy.context.active_object.data.distance=10*scale
             bpy.context.active_object.parent=owner
-            
+            bpy.context.active_object.layers[3]= True
+            bpy.context.active_object.layers[0]= False
+            bpy.context.active_object.layers[1]= False
+            bpy.context.active_object.layers[2]= False
+
         
     #insert camera  
       if objectName in ('observerCamera'): 
@@ -401,7 +418,10 @@ class OpenFile(bpy.types.Operator):
     
     bpy.data.scenes["Scene"].unit_settings.system='METRIC'
     bpy.data.scenes["Scene"].unit_settings.scale_length=0.01/scale
-    
+    bpy.data.scenes["Scene"].layers[0]=True
+    bpy.data.scenes["Scene"].layers[1]=True
+    bpy.data.scenes["Scene"].layers[2]=True
+    bpy.data.scenes["Scene"].layers[3]=True
     
     return {'FINISHED'}
 
