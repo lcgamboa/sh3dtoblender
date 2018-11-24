@@ -37,7 +37,8 @@
 from zipfile import ZipFile
 from xml.etree import cElementTree as ElementTree
 from collections import namedtuple
-
+from urllib.parse import unquote
+    
 import os
 import math
 import bpy
@@ -136,7 +137,7 @@ class OpenFile(bpy.types.Operator):
       #if objectName in ('doorOrWindow','pieceOfFurniture'):
       if 'model' in element.keys():  
         print(objectName)   
-        filename=os.path.join(xml_path,element.get('model'))
+        filename=os.path.join(xml_path,unquote(element.get('model')))
         dimX = float(element.get('width'))
         dimY = float(element.get('height'))
         dimZ = float(element.get('depth')) 
