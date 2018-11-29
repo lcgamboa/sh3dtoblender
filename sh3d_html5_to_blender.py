@@ -52,6 +52,9 @@ speed=0.5
 class OpenFile(bpy.types.Operator):
   bl_idname = "object.openfile"
   bl_label = "Open"
+  filename_ext = ".zip"
+  filter_glob = bpy.props.StringProperty(default='*.zip', options={'HIDDEN'}, maxlen=255)
+
  
   filepath = bpy.props.StringProperty(subtype="FILE_PATH")
 
