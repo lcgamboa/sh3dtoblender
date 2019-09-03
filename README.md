@@ -8,7 +8,7 @@
 *   1-Open Sweethome 3D  http://www.sweethome3d.com
 *   2-Create or open a existent house
 *   3-Use the plugin <del>EXPORT to HTML5 or</del> EXPORT to XML/OBJ <del>http://www.sweethome3d.com/support/forum/viewthread_thread,6708</del>  http://www.sweethome3d.com/support/forum/viewthread_thread,6708_offset,20#29819
-*   4-Open blender 
+*   4-Open blender 2.79 (don't work yet on blender 2.8x) 
 *   5-Choose Text Editor window and open <del>sh3d_html5_to_blender.py or</del> sh3d_xml_to_blender.py script
 *   6-Run the script, in the File dialog choose the zip file generate by SweetHome 3D EXPORT to <del>HTML5</del> XML/OBJ plugin
    
