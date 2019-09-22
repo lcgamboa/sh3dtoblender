@@ -171,9 +171,9 @@ class OpenFile(bpy.types.Operator):
         #bpy.context.active_object.layers[0]= False
         #bpy.context.active_object.layers[3]= False
         
-        if 'modelMirrored' in element.keys():
-          if element.get('modelMirrored') == 'true':
-            bpy.ops.transform.mirror(constraint_axis=(True, False, False),constraint_orientation='GLOBAL', proportional='DISABLED')
+        #if 'modelMirrored' in element.keys():
+          #if element.get('modelMirrored') == 'true':
+            #bpy.ops.transform.mirror(constraint_axis=(True, False, False),constraint_orientation='GLOBAL', proportional='DISABLED')
       
         if 'modelRotation' in element.keys():
           value=element.get('modelRotation')
@@ -229,8 +229,8 @@ class OpenFile(bpy.types.Operator):
                   img = bpy.data.images.load(os.path.join(xml_path,image))
                   tex = bpy.data.textures.new(image, type = 'IMAGE')
                   tex.image = img        
-                  mtex = material.texture_slots.add()
-                  mtex.texture = tex
+                  #mtex = material.texture_slots.add()
+                  #mtex.texture = tex
               
           if prop.tag == 'material':
               mname=prop.get('name')
@@ -275,7 +275,7 @@ class OpenFile(bpy.types.Operator):
             lposz=(float(light.get('z'))-0.5)*dimZ*scale*2.1
                 
             bpy.ops.object.light_add(type='POINT',location=(lposx, lposy, lposz))
-            bpy.context.active_object.data.energy=4000.0*power*scale
+            bpy.context.active_object.data.energy=40000.0*power*scale
             #bpy.context.active_object.data.shadow_method='RAY_SHADOW'
             bpy.context.active_object.data.color=bcolor
             bpy.context.active_object.data.distance=10*scale
@@ -401,31 +401,31 @@ class OpenFile(bpy.types.Operator):
         
         
     #Iterate over all members of the material struct and disable apha (to solve texture errors in blender game engine)
-    for item in bpy.data.materials:
-        if item.alpha == 1.0 :
-           item.use_transparency = False
-           item.use_transparent_shadows = True
-        else:
-           item.raytrace_mirror.use = True
-           item.raytrace_mirror.reflect_factor= 0.1  
-           item.diffuse_intensity= 0.01
+    #for item in bpy.data.materials:
+    #    if item.alpha == 1.0 :
+    #       item.use_transparency = False
+    #       item.use_transparent_shadows = True
+    #    else:
+    #       item.raytrace_mirror.use = True
+    #       item.raytrace_mirror.reflect_factor= 0.1  
+    #       item.diffuse_intensity= 0.01
  
            
     #better collision detection      
-    bpy.data.scenes["Scene"].game_settings.physics_step_sub=5.0 
+    #bpy.data.scenes["Scene"].game_settings.physics_step_sub=5.0 
     
     #world settings
     bpy.data.worlds["World"].light_settings.use_ambient_occlusion=True
     bpy.data.worlds["World"].light_settings.ao_factor=0.01
-    bpy.data.worlds["World"].light_settings.use_environment_light=True
-    bpy.data.worlds["World"].light_settings.environment_energy=0.01
+    #bpy.data.worlds["World"].light_settings.use_environment_light=True
+    #bpy.data.worlds["World"].light_settings.environment_energy=0.01
     
     bpy.data.scenes["Scene"].unit_settings.system='METRIC'
     bpy.data.scenes["Scene"].unit_settings.scale_length=0.01/scale
-    bpy.data.scenes["Scene"].layers[0]=True
-    bpy.data.scenes["Scene"].layers[1]=True
-    bpy.data.scenes["Scene"].layers[2]=True
-    bpy.data.scenes["Scene"].layers[3]=True
+    #bpy.data.scenes["Scene"].layers[0]=True
+    #bpy.data.scenes["Scene"].layers[1]=True
+    #bpy.data.scenes["Scene"].layers[2]=True
+    #bpy.data.scenes["Scene"].layers[3]=True
     
     return {'FINISHED'}
 
