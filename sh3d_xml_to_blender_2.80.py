@@ -90,7 +90,7 @@ class OpenFile(bpy.types.Operator):
 
     #clear materials
     #for material in bpy.data.materials:
-    #    material.user_clear();
+    #    material.user_clear()
     #    bpy.data.materials.remove(material)    
         
     #clear textures
@@ -143,7 +143,7 @@ class OpenFile(bpy.types.Operator):
         locX = float(element.get('x'))*scale
         locY = -float(element.get('y'))*scale
         
-        lve=0.0;
+        lve=0.0
         if 'level' in element.keys():
           for lv in levels:
             if lv.id == element.get('level'):
@@ -171,9 +171,9 @@ class OpenFile(bpy.types.Operator):
         #bpy.context.active_object.layers[0]= False
         #bpy.context.active_object.layers[3]= False
         
-        #if 'modelMirrored' in element.keys():
-          #if element.get('modelMirrored') == 'true':
-            #bpy.ops.transform.mirror(constraint_axis=(True, False, False),constraint_orientation='GLOBAL', proportional='DISABLED')
+        if 'modelMirrored' in element.keys():
+          if element.get('modelMirrored') == 'true':
+            bpy.ops.transform.mirror(constraint_axis=(True, False, False),orient_type='GLOBAL', use_proportional_edit=False)
       
         if 'modelRotation' in element.keys():
           value=element.get('modelRotation')
@@ -217,9 +217,9 @@ class OpenFile(bpy.types.Operator):
           r=int(color[2:4],16)/255.0
           g=int(color[4:6],16)/255.0
           b=int(color[6:8],16)/255.0
-          bcolor=[r,g,b,0]
+          bcolor=[r,g,b,170]
           for material in bpy.context.active_object.data.materials:
-            material.diffuse_color=bcolor
+            material.node_tree.nodes["Principled BSDF"].inputs[0].default_value=bcolor
   
         #search for texture or materials
         for prop in element:
@@ -227,10 +227,11 @@ class OpenFile(bpy.types.Operator):
               image=prop.get('image')
               for material in bpy.context.active_object.data.materials:
                   img = bpy.data.images.load(os.path.join(xml_path,image))
-                  tex = bpy.data.textures.new(image, type = 'IMAGE')
-                  tex.image = img        
-                  #mtex = material.texture_slots.add()
-                  #mtex.texture = tex
+                  material.use_nodes = True
+                  bsdf = material.node_tree.nodes["Principled BSDF"]
+                  texImage = material.node_tree.nodes.new('ShaderNodeTexImage')
+                  texImage.image = img
+                  material.node_tree.links.new(bsdf.inputs['Base Color'], texImage.outputs['Color'])
               
           if prop.tag == 'material':
               mname=prop.get('name')
@@ -242,7 +243,7 @@ class OpenFile(bpy.types.Operator):
                 bcolor=[r,g,b,0]
                 for material in bpy.context.active_object.data.materials:
                   if mname in material.name: 
-                    material.diffuse_color=bcolor
+                    material.node_tree.nodes["Principled BSDF"].inputs[0].default_value=bcolor
         
               #face texture of material
               for texture in prop:
@@ -251,10 +252,13 @@ class OpenFile(bpy.types.Operator):
                   for material in bpy.context.active_object.data.materials:
                      if mname in material.name: 
                        img = bpy.data.images.load(os.path.join(xml_path,image))
-                       tex = bpy.data.textures.new(image, type = 'IMAGE')
-                       tex.image = img        
-                       #mtex = material.texture_slots.add()
-                       #mtex.texture = tex  
+                       material.use_nodes = True
+                       bsdf = material.node_tree.nodes["Principled BSDF"]
+                       texImage = material.node_tree.nodes.new('ShaderNodeTexImage')
+                       texImage.image = img
+                       material.node_tree.links.new(bsdf.inputs['Base Color'], texImage.outputs['Color'])
+                       
+                       
            
       
       if objectName in ('light'):   
