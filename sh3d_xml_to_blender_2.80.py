@@ -4,7 +4,7 @@
 #
 #  ########################################################################
 #
-#   Copyright (c) : 2018  Luis Claudio Gambôa Lopes
+#   Copyright (c) : 2020  Luis Claudio Gambôa Lopes
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -83,6 +83,10 @@ class OpenFile(bpy.types.Operator):
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
 
+    #clear layers
+    for layer in bpy.data.collections:
+      bpy.data.collections.remove(layer)
+
     #clear images
     imgs = bpy.data.images
     for image in imgs:
@@ -99,6 +103,19 @@ class OpenFile(bpy.types.Operator):
         tex.user_clear()
         bpy.data.textures.remove(tex)
 
+    #create layers
+    
+    l_house =  bpy.data.collections.new(name="Home")
+    context.scene.collection.children.link(l_house)
+    l_light =  bpy.data.collections.new(name="Light")
+    l_house.children.link(l_light)
+    l_furniture =  bpy.data.collections.new(name="Furniture")
+    l_house.children.link(l_furniture)
+    l_door =  bpy.data.collections.new(name="Door/Window")
+    l_house.children.link(l_door)
+    l_player =  bpy.data.collections.new(name="Player")
+    l_house.children.link(l_player)
+    
 
     #read xml and files
     xmlPath = os.path.join(xml_path,'Home.xml')
@@ -114,11 +131,9 @@ class OpenFile(bpy.types.Operator):
     obs[0].dimensions=obs[0].dimensions*scale
     obs[0].location=(0.0, 0.0, 0.0)
     bpy.ops.object.shade_flat()
-    #bpy.context.active_object.layers[0]= True
-    #bpy.context.active_object.layers[1]= False
-    #bpy.context.active_object.layers[2]= False
-    #bpy.context.active_object.layers[3]= False
-
+    l_house.objects.link(bpy.context.active_object)
+    bpy.context.scene.collection.objects.unlink(bpy.context.active_object) 
+    
     Level = namedtuple("Level", "id elev ft")
     levels=[]
 
@@ -132,7 +147,6 @@ class OpenFile(bpy.types.Operator):
          for furniture in element:
             xmlRoot.append(furniture);      
       
-      #if objectName in ('doorOrWindow','pieceOfFurniture'):
       if 'model' in element.keys():  
         print(objectName)   
         filename=os.path.join(xml_path,unquote(element.get('model')))
@@ -162,15 +176,12 @@ class OpenFile(bpy.types.Operator):
         bpy.ops.object.join()
         obs[0].name=element.get('name')
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY',center='BOUNDS')     
-        #if objectName in ('doorOrWindow'):   
-        #   bpy.context.active_object.layers[1]= True  
-        #   bpy.context.active_object.layers[2]= False        
-        #else:
-        #   bpy.context.active_object.layers[2]= True
-        #   bpy.context.active_object.layers[1]= False
-        #bpy.context.active_object.layers[0]= False
-        #bpy.context.active_object.layers[3]= False
-        
+        if objectName in ('doorOrWindow'):   
+            l_door.objects.link(bpy.context.active_object)
+        else:
+            l_furniture.objects.link(bpy.context.active_object)
+        bpy.context.scene.collection.objects.unlink(bpy.context.active_object) 
+            
         if 'modelMirrored' in element.keys():
           if element.get('modelMirrored') == 'true':
             bpy.ops.transform.mirror(constraint_axis=(True, False, False),orient_type='GLOBAL', use_proportional_edit=False)
@@ -217,7 +228,7 @@ class OpenFile(bpy.types.Operator):
           r=int(color[2:4],16)/255.0
           g=int(color[4:6],16)/255.0
           b=int(color[6:8],16)/255.0
-          bcolor=[r,g,b,170]
+          bcolor=[r,g,b,0]
           for material in bpy.context.active_object.data.materials:
             material.node_tree.nodes["Principled BSDF"].inputs[0].default_value=bcolor
   
@@ -284,11 +295,9 @@ class OpenFile(bpy.types.Operator):
             bpy.context.active_object.data.color=bcolor
             bpy.context.active_object.data.distance=10*scale
             bpy.context.active_object.parent=owner
-            #bpy.context.active_object.layers[3]= True
-            #bpy.context.active_object.layers[0]= False
-            #bpy.context.active_object.layers[1]= False
-            #bpy.context.active_object.layers[2]= False
-
+            l_light.objects.link(bpy.context.active_object)
+            bpy.context.scene.collection.objects.unlink(bpy.context.active_object) 
+            
         
     #insert camera  
       if objectName in ('observerCamera'): 
@@ -301,6 +310,9 @@ class OpenFile(bpy.types.Operator):
         
         
         bpy.ops.object.camera_add(location=(locX, locY, locZ),rotation=((-pitch/8.0)+(-math.pi/2.0),math.pi,0))
+        l_player.objects.link(bpy.context.active_object)
+        bpy.context.scene.collection.objects.unlink(bpy.context.active_object) 
+    
         bpy.ops.mesh.primitive_cube_add(location=(locX, locY, locZ-(170.0*scale/2.0)),rotation=(0.0,0.0,-yaw))
         
         obs = bpy.context.selected_editable_objects[:] 
@@ -315,10 +327,12 @@ class OpenFile(bpy.types.Operator):
         #bpy.data.objects["player"].game.use_collision_bounds=True
         #bpy.data.objects["player"].game.step_height=0.8
         
+        l_player.objects.link(bpy.context.active_object)
+        bpy.context.scene.collection.objects.unlink(bpy.context.active_object) 
         
         #add logic blocks
-        obj=bpy.data.objects["player"]
-        cam=bpy.data.objects["Camera"]
+        #obj=bpy.data.objects["player"]
+        #cam=bpy.data.objects["Camera"]
         
         #foward
         #bpy.ops.logic.sensor_add(type="KEYBOARD", object="player")
