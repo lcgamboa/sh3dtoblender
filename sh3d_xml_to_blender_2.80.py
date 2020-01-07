@@ -228,7 +228,7 @@ class OpenFile(bpy.types.Operator):
           r=int(color[2:4],16)/255.0
           g=int(color[4:6],16)/255.0
           b=int(color[6:8],16)/255.0
-          bcolor=[r,g,b,0]
+          bcolor=[r,g,b,1.0]
           for material in bpy.context.active_object.data.materials:
             material.node_tree.nodes["Principled BSDF"].inputs[0].default_value=bcolor
   
@@ -251,7 +251,7 @@ class OpenFile(bpy.types.Operator):
                 r=int(color[2:4],16)/255.0
                 g=int(color[4:6],16)/255.0
                 b=int(color[6:8],16)/255.0
-                bcolor=[r,g,b,0]
+                bcolor=[r,g,b,1.0]
                 for material in bpy.context.active_object.data.materials:
                   if mname in material.name: 
                     material.node_tree.nodes["Principled BSDF"].inputs[0].default_value=bcolor
